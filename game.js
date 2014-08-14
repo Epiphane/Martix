@@ -9,6 +9,15 @@ exports.init = function(program) {
     this.catchInput = true;
   }
 
+  this.loadModule = function(moduleName) {
+    var mod = require(moduleName).init(program);
+    if(mod.intro) {
+      mod.intro();
+    }
+
+    return mod;
+  }
+
 	this.quit = function() {
 		program.writeln('Bye!');
 		process.exit(0);
@@ -19,7 +28,7 @@ exports.init = function(program) {
     if(key.name === 'y' && !this.currentModule) {
       program.writeln('y');
       program.writeln('Loading echo...');
-      this.currentModule = require(this.default_module).init(program);
+      this.currentModule = this.loadModule(this.default_module);
       this.catchInput = false;
     }
     // They want a custom module
@@ -39,8 +48,7 @@ exports.init = function(program) {
       this.currentModule.interpret(command, program);
     }
     else {
-      if(command === 'y')
-      this.currentModule = require('./module/' + command + '.js').init(program);
+      this.currentModule = this.loadModule('./module/' + command + '.js');
     }
 	}
 
