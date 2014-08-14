@@ -1,21 +1,24 @@
-// Initialize game
-var game = require('./game.js')();
-
 var program = require('blessed')();
 program.command = '';
-program.inputEnabled = true;
 program.log = [];
 
-var printLine = function(line) {
+// Initialize game
+var game = require('./game.js').init(program);
+
+program.writeln = function(line) {
   program.write(line);
   program.feed();
 }
+
+// Welcome the user
+if(game.intro)
+  game.intro();
 
 program.on('keypress', function(ch, key) {
   if(game.catchInput) {
     game.input(ch, key);
   }
-  else if(program.inputEnabled) {
+  else {
     if(key.name === 'backspace') { // Backspace
       program.cursorBackward(1); 
       program.eraseInLine();
@@ -23,12 +26,9 @@ program.on('keypress', function(ch, key) {
     }
     else if(key.name === 'return' || key.name === 'enter') {
       if(program.command.length > 0) {
-        program.inputEnabled = false;
         program.feed();
-        game.interpret(program.command, printLine).then(function() {
-          program.command = '';
-          program.inputEnabled = true;
-        });
+        game.interpret(program.command);
+        program.command = '';
       }
     }
     else {
